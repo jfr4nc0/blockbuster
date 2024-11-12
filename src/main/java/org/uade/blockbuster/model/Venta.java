@@ -2,22 +2,36 @@ package org.uade.blockbuster.model;
 
 import org.uade.blockbuster.model.enums.TipoTarjeta;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 public class Venta {
     private int ventaId;
-    private Date fechaVenta;
+    private LocalDate fechaVenta;
     private List<Combo> combos;
     private Funcion funcion;
     private TarjetaDescuento tarjetaDescuento;
+    private List<Entrada> entradas;
 
-    public Venta(int ventaId, Date fechaVenta, List<Combo> combos, Funcion funcion, TarjetaDescuento tarjetaDescuento) {
+    public Venta(int ventaId, LocalDate fechaVenta, List<Combo> combos, Funcion funcion, TarjetaDescuento tarjetaDescuento, List<Entrada> entradas) {
         this.ventaId = ventaId;
         this.fechaVenta = fechaVenta;
         this.combos = combos;
         this.funcion = funcion;
         this.tarjetaDescuento = tarjetaDescuento;
+        this.entradas = entradas;
+    }
+
+    public LocalDate getFechaVenta() {
+        return fechaVenta;
+    }
+
+    public List<Entrada> getEntradas() {
+        return entradas;
+    }
+
+    public void setEntradas(List<Entrada> entradas) {
+        this.entradas = entradas;
     }
 
     public Funcion getFuncion() {

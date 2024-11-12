@@ -1,5 +1,6 @@
 package org.uade.blockbuster.model;
 
+import org.uade.blockbuster.model.enums.TipoDescuento;
 import org.uade.blockbuster.model.enums.TipoTarjeta;
 
 import java.util.Date;
@@ -12,6 +13,25 @@ public class CondicionesDescuento {
     private Double porcentaje;
     private TipoTarjeta tipoTarjeta;
     private List<TarjetaDescuento> tarjetasDescuento;
+    private TipoDescuento tipoDescuento;
+
+    public CondicionesDescuento(Date fechaDesde, Date fechaHasta, int diaSemana, Double porcentaje, TipoTarjeta tipoTarjeta, List<TarjetaDescuento> tarjetasDescuento, TipoDescuento tipoDescuento) {
+        this.fechaDesde = fechaDesde;
+        this.fechaHasta = fechaHasta;
+        this.diaSemana = diaSemana;
+        this.porcentaje = porcentaje;
+        this.tipoTarjeta = tipoTarjeta;
+        this.tarjetasDescuento = tarjetasDescuento;
+        this.tipoDescuento = tipoDescuento;
+    }
+
+    public TipoDescuento getTipoDescuento() {
+        return tipoDescuento;
+    }
+
+    public void setTipoDescuento(TipoDescuento tipoDescuento) {
+        this.tipoDescuento = tipoDescuento;
+    }
 
     public void setPorcentaje(Double porcentaje) {
         this.porcentaje = porcentaje;
