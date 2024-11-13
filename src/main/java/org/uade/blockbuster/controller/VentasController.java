@@ -85,7 +85,7 @@ public class VentasController {
                 .entrySet().stream()
                 .max(Map.Entry.comparingByValue())
                 .map(Map.Entry::getKey)
-                .orElse(null);
+                .orElse(-1);
     }
 
     public Venta buscarVentaPorFuncion(Funcion funcion) throws NotFoundException {
@@ -115,6 +115,15 @@ public class VentasController {
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
+    }
+
+    public int diaDeLaSemanaConMenorVentas() {
+        return ventas.stream()
+                .collect(Collectors.groupingBy(venta -> venta.getFechaVenta().getDayOfWeek().getValue(), Collectors.counting()))
+                .entrySet().stream()
+                .min(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(-1);
     }
 
     public VentaDto toDto(Venta venta) throws NotFoundException {
