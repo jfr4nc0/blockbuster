@@ -66,8 +66,10 @@ public class Venta {
         return null;
     }
 
-    public List<Combo> getListaComboId() {
-        return combos;
+    public List<Integer> getListaComboId() {
+        return combos.stream()
+                .map(Combo::getComboId)
+                .toList();
     }
 
     public Double calcularMontoPorComboDeVenta() {

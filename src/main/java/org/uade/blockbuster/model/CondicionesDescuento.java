@@ -3,19 +3,20 @@ package org.uade.blockbuster.model;
 import org.uade.blockbuster.model.enums.TipoDescuento;
 import org.uade.blockbuster.model.enums.TipoTarjeta;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
 public class CondicionesDescuento {
-    private Date fechaDesde;
-    private Date fechaHasta;
+    private LocalDate fechaDesde;
+    private LocalDate fechaHasta;
     private int diaSemana;
     private Double porcentaje;
     private TipoTarjeta tipoTarjeta;
     private List<TarjetaDescuento> tarjetasDescuento;
     private TipoDescuento tipoDescuento;
 
-    public CondicionesDescuento(Date fechaDesde, Date fechaHasta, int diaSemana, Double porcentaje, TipoTarjeta tipoTarjeta, List<TarjetaDescuento> tarjetasDescuento, TipoDescuento tipoDescuento) {
+    public CondicionesDescuento(LocalDate fechaDesde, LocalDate fechaHasta, int diaSemana, Double porcentaje, TipoTarjeta tipoTarjeta, List<TarjetaDescuento> tarjetasDescuento, TipoDescuento tipoDescuento) {
         this.fechaDesde = fechaDesde;
         this.fechaHasta = fechaHasta;
         this.diaSemana = diaSemana;
@@ -37,11 +38,11 @@ public class CondicionesDescuento {
         this.porcentaje = porcentaje;
     }
 
-    public Date getFechaDesde() {
+    public LocalDate getFechaDesde() {
         return fechaDesde;
     }
 
-    public Date getFechaHasta() {
+    public LocalDate getFechaHasta() {
         return fechaHasta;
     }
 
@@ -62,8 +63,7 @@ public class CondicionesDescuento {
     }
 
     public Double getDescuento() {
-        //TODO
-        return null;
+        return this.porcentaje / 100.00;
     }
 
     public Double getDescuentoPorTarjeta(TipoTarjeta tipoTarjeta) {
