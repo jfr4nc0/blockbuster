@@ -1,6 +1,7 @@
 package org.uade.blockbuster.controller;
 
-import org.uade.blockbuster.controller.dto.FuncionDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.uade.blockbuster.controller.dto.TarjetaDescuentoDto;
 import org.uade.blockbuster.controller.dto.VentaDto;
 import org.uade.blockbuster.exceptions.NotFoundException;
@@ -11,11 +12,14 @@ import org.uade.blockbuster.model.enums.TipoTarjeta;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class VentasController {
     private static volatile VentasController INSTANCE;
     private Collection<Venta> ventas;
+
+    private static final Logger log = LoggerFactory.getLogger(VentasController.class);
 
     private VentasController() {
         this.ventas = new ArrayList<Venta>();
@@ -91,14 +95,29 @@ public class VentasController {
                 .orElseThrow(() -> new NotFoundException("No se encontro una venta para la funcionId: " + funcion.getFuncionId()));
     }
 
-    public Collection<VentaDto> funcionesVendidasPorGenero(TipoGenero tipoGenero) throws NotFoundException {
+    public Collection<VentaDto> funcionesVendidasPorGenero(TipoGenero tipoGenero) {
         return ventas.stream()
-                .filter(venta -> venta.getFuncion().getPelicula().getGenero().equals(tipoGenero))
-                .map(this::toDto)
+                .filter(venta -> {
+                    try {
+                        return PeliculasController.getInstance().buscarPeliculaById(venta.getFuncion().getPeliculaId()).getGenero().equals(tipoGenero);
+                    } catch (NotFoundException e) {
+                        log.error("Not found pelicula for id: {}", venta.getFuncion().getPeliculaId());
+                        return false;
+                    }
+                })
+                .map(venta -> {
+                    try {
+                        return this.toDto(venta);
+                    } catch (NotFoundException e) {
+                        log.error("Cannot map to VentaDto, venta: {}", venta);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 
-    public VentaDto toDto(Venta venta) {
+    public VentaDto toDto(Venta venta) throws NotFoundException {
         return new VentaDto(
                 venta.getVentaId(),
                 venta.getFechaVenta().toString(),

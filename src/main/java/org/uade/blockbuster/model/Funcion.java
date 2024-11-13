@@ -15,41 +15,28 @@ public class Funcion {
         return horario;
     }
 
-    public Sala getSala() {
-        return sala;
-    }
-
-    public Pelicula getPelicula() {
-        return pelicula;
-    }
-
     public List<Entrada> getEntradas() {
         return entradas;
     }
 
     public int getSalaId() {
-        //TODO
         return 0;
     }
 
     public int getSucursalId() {
-        //TODO
         return 0;
     }
 
     public int getPeliculaId() {
-        //TODO
-        return 0;
+        return pelicula.getPeliculaId();
     }
 
     public int getCantidadDeAsientosDisponibles() {
-        //TODO
-        return 0;
+        return sala.getAsientos() - entradas.stream().mapToInt(Entrada::getNroAsiento).sum();
     }
 
     public int getFuncionId() {
-        //TODO
-        return 0;
+        return funcionId;
     }
 
     public Date getFecha() {

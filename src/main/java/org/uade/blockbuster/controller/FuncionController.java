@@ -33,6 +33,13 @@ public class FuncionController {
         }
     }
 
+    public int obtenerAsientosDisponiblesPorFuncion(int funcionId) {
+        return funciones.stream()
+                .filter(funcion -> funcion.getFuncionId() == funcionId)
+                .mapToInt(Funcion::getCantidadDeAsientosDisponibles)
+                .sum();
+    }
+
     public Funcion buscarFuncionById(int funcionId) throws NotFoundException {
         return buscarFuncion(funcion -> funcion.getFuncionId() == funcionId)
                 .orElseThrow(() -> new NotFoundException("No existe una funcion con el id: " + funcionId));
@@ -44,13 +51,13 @@ public class FuncionController {
                 .findFirst();
     }
 
-    public FuncionDto toDto(Funcion funcion) {
+    public FuncionDto toDto(Funcion funcion) throws NotFoundException {
         return new FuncionDto(
                 funcion.getFuncionId(),
-                funcion.getPelicula().getNombrePelicula(),
+                PeliculasController.getInstance().buscarPeliculaById(funcion.getPeliculaId()).getNombrePelicula(),
                 funcion.getFecha().toString(),
                 funcion.getHorario(),
-                funcion.getSala().getSalaId());
+                funcion.getSalaId());
     }
 
     public EntradaDto toDto(Entrada entrada) {
