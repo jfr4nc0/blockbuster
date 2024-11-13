@@ -4,9 +4,7 @@ import org.uade.blockbuster.exceptions.NotFoundException;
 import org.uade.blockbuster.model.Combo;
 import org.uade.blockbuster.model.CondicionesDescuento;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
 
 public class CombosController {
     private static volatile CombosController INSTANCE;
@@ -38,5 +36,12 @@ public class CombosController {
                 .filter(combo -> combo.getComboId() == comboId)
                 .findFirst()
                 .orElse(null);
+    }
+
+    public List<Combo> getCombosByCombosId(List<Integer> combosId) {
+        return combosId.stream()
+                .map(comboId -> buscarComboById(comboId))
+                .filter(Objects::nonNull)
+                .toList();
     }
 }

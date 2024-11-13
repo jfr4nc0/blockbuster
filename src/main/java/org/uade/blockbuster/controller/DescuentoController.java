@@ -6,7 +6,11 @@ import org.uade.blockbuster.model.Entrada;
 import org.uade.blockbuster.model.Venta;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 public class DescuentoController {
     private static volatile DescuentoController INSTANCE;
@@ -29,10 +33,6 @@ public class DescuentoController {
         }
     }
 
-    public Collection<CondicionesDescuento> getDescuentos() {
-        return descuentos;
-    }
-
     public double procesadorDeDescuentosParaVenta(Venta venta) {
         double descuentoDiaDeSemanaAEntrada = getDescuentoDiaDeSemanaAEntrada(venta);
 
@@ -40,7 +40,7 @@ public class DescuentoController {
 
         if (descuento.isPresent()) {
                 CondicionesDescuento condicionesDescuento = descuento.get();
-                List<Combo> combos = getCombosByCombosId(venta.getListaComboId());
+                List<Combo> combos = CombosController.getInstance().getCombosByCombosId(venta.getListaComboId());
                 List<Entrada> entradas = venta.getEntradas();
 
                 switch (condicionesDescuento.getTipoDescuento()){
@@ -86,16 +86,6 @@ public class DescuentoController {
 
     private double aplicarDescuentos(List<Entrada> entradas, List<Combo> combos, double descuentoTarjeta, double descuentoDiaDeSemanaAEntrada) {
         return aplicarDescuentos(entradas, descuentoTarjeta, descuentoDiaDeSemanaAEntrada) + aplicarDescuentos(combos, descuentoTarjeta);
-    }
-
-    private static List<Combo> getCombosByCombosId(List<Integer> combosId) {
-        CombosController combosController = CombosController.getInstance();
-
-        List<Combo> combos = combosId.stream()
-            .map(comboId -> combosController.buscarComboById(comboId))
-            .filter(Objects::nonNull)
-            .toList();
-        return combos;
     }
 
     private static boolean isDateInRange(LocalDate startDate, LocalDate endDate, LocalDate targetDate) {

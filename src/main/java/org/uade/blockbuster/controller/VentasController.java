@@ -1,10 +1,16 @@
 package org.uade.blockbuster.controller;
 
 import org.uade.blockbuster.exceptions.NotFoundException;
-import org.uade.blockbuster.model.*;
+import org.uade.blockbuster.model.Combo;
+import org.uade.blockbuster.model.Funcion;
+import org.uade.blockbuster.model.Pelicula;
+import org.uade.blockbuster.model.Venta;
+import org.uade.blockbuster.model.enums.TipoTarjeta;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class VentasController {
     private static volatile VentasController INSTANCE;
@@ -35,23 +41,8 @@ public class VentasController {
         this.ventas = ventas;
     }
 
-    public Double recaudacionPorFuncion(int funcionId) throws NotFoundException {
+    public double recaudacionPorFuncion(int funcionId) throws NotFoundException {
         Funcion funcion = FuncionController.getInstance().buscarFuncionById(funcionId);
-        // se debe evaluar si el descuento aplica en la fecha de validez tmb
-
-        /*
-        Double totalEntradasConDescuento = ventas.stream()
-                .filter(venta -> venta.getFuncion().equals(funcion))
-                .flatMap(venta -> venta.getEntradas().stream()
-                        .map(entrada -> new EntradaConFechaVentaConTarjetaDescuento(entrada, venta.getFechaVenta(), venta.getTarjetaDescuento())))
-                .mapToDouble(data -> this.calcularPrecioConDescuentos(data, descuentos))
-                .sum();
-         */
-
-        // aplicar descuentos sobre el subtotal, o el descuento necesario sobre el total de cada venta
-        // lunes a miercoles -> 50% aplicado al precio normal de entrada -> ok
-        // definicion de porcentajes de descuento por tarjetas -> variable
-
 
         double totalRecaudadoPorVenta = ventas.stream()
                 .filter(venta -> venta.getFuncion().equals(funcion))
@@ -59,5 +50,36 @@ public class VentasController {
                 .sum();
 
         return totalRecaudadoPorVenta;
+    }
+
+    public double recaudacionPorPelicula(int peliculaId) throws NotFoundException {
+        Pelicula pelicula = PeliculasController.getInstance().buscarPeliculaById(peliculaId);
+
+        double totalRecaudadoPorPelicula = ventas.stream()
+                .filter(venta -> venta.getFuncion().getPeliculaId() == pelicula.getPeliculaId())
+                .mapToDouble(venta -> DescuentoController.getInstance().procesadorDeDescuentosParaVenta(venta))
+                .sum();
+
+        return totalRecaudadoPorPelicula;
+    }
+
+    public double recaudacionPorTarjetaDescuento(TipoTarjeta tipoTarjeta) throws NotFoundException {
+        double totalRecaudadoPorTarjetaDescuento = ventas.stream()
+                .filter(venta -> venta.getTarjetaDescuento().equals(tipoTarjeta))
+                .mapToDouble(venta -> DescuentoController.getInstance().procesadorDeDescuentosParaVenta(venta))
+                .sum();
+
+        return totalRecaudadoPorTarjetaDescuento;
+    }
+
+    public int comboMasVendido() {
+        return ventas.stream()
+                .map(venta -> CombosController.getInstance().getCombosByCombosId(venta.getListaComboId()))
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(Combo::getComboId, Collectors.counting()))
+                .entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(null);
     }
 }
