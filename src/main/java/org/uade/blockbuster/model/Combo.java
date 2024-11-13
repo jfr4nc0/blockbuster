@@ -6,6 +6,10 @@ public class Combo {
     private Double precio;
     private CondicionesDescuento contiene;
 
+    public String getDescripcion() {
+        return descripcion;
+    }
+
     public Double getPrecio() {
         return precio;
     }

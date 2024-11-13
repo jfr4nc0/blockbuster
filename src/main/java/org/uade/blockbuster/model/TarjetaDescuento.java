@@ -6,6 +6,10 @@ public class TarjetaDescuento {
     private int tarjetaId;
     private TipoTarjeta tipoTarjeta;
 
+    public int getTarjetaId() {
+        return tarjetaId;
+    }
+
     public TipoTarjeta getTipoTarjeta() {
         return tipoTarjeta;
     }

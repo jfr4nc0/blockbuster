@@ -1,10 +1,11 @@
 package org.uade.blockbuster.controller;
 
+import org.uade.blockbuster.controller.dto.FuncionDto;
+import org.uade.blockbuster.controller.dto.TarjetaDescuentoDto;
+import org.uade.blockbuster.controller.dto.VentaDto;
 import org.uade.blockbuster.exceptions.NotFoundException;
-import org.uade.blockbuster.model.Combo;
-import org.uade.blockbuster.model.Funcion;
-import org.uade.blockbuster.model.Pelicula;
-import org.uade.blockbuster.model.Venta;
+import org.uade.blockbuster.model.*;
+import org.uade.blockbuster.model.enums.TipoGenero;
 import org.uade.blockbuster.model.enums.TipoTarjeta;
 
 import java.util.ArrayList;
@@ -81,5 +82,36 @@ public class VentasController {
                 .max(Map.Entry.comparingByValue())
                 .map(Map.Entry::getKey)
                 .orElse(null);
+    }
+
+    public Venta buscarVentaPorFuncion(Funcion funcion) throws NotFoundException {
+        return ventas.stream()
+                .filter(venta -> venta.getFuncion().equals(funcion))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("No se encontro una venta para la funcionId: " + funcion.getFuncionId()));
+    }
+
+    public Collection<VentaDto> funcionesVendidasPorGenero(TipoGenero tipoGenero) throws NotFoundException {
+        return ventas.stream()
+                .filter(venta -> venta.getFuncion().getPelicula().getGenero().equals(tipoGenero))
+                .map(this::toDto)
+                .collect(Collectors.toSet());
+    }
+
+    public VentaDto toDto(Venta venta) {
+        return new VentaDto(
+                venta.getVentaId(),
+                venta.getFechaVenta().toString(),
+                CombosController.getInstance().getCombosDtoByCombosId(venta.getListaComboId()),
+                FuncionController.getInstance().toDto(venta.getFuncion()),
+                toDto(venta.getTarjetaDescuento()),
+                FuncionController.getInstance().toDtos(venta.getEntradas())
+                );
+    }
+
+    public TarjetaDescuentoDto toDto(TarjetaDescuento tarjetaDescuento) {
+        return new TarjetaDescuentoDto(
+                tarjetaDescuento.getTarjetaId(),
+                tarjetaDescuento.getTipoTarjeta().toString());
     }
 }

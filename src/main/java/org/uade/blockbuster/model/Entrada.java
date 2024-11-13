@@ -5,17 +5,19 @@ public class Entrada {
     private int nroAsiento;
     private Funcion funcion;
 
+    public int getNroAsiento() {
+        return nroAsiento;
+    }
+
     public Double getPrecio() {
         return precio;
     }
 
     public int getFuncionId() {
-        //TODO
         return funcion.getFuncionId();
     }
 
     public int getPeliculaId() {
-        //TODO
         return funcion.getPeliculaId();
     }
 }

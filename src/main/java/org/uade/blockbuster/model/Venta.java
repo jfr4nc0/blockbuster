@@ -22,6 +22,10 @@ public class Venta {
         this.entradas = entradas;
     }
 
+    public int getVentaId() {
+        return ventaId;
+    }
+
     public LocalDate getFechaVenta() {
         return fechaVenta;
     }

@@ -15,6 +15,26 @@ public class Pelicula {
     private TipoProyeccion tipoProyeccion;
     private CondicionesDescuento condicionesDescuento;
 
+    public String getNombrePelicula() {
+        return nombrePelicula;
+    }
+
+    public int getDuracionEnMinutos() {
+        return duracionEnMinutos;
+    }
+
+    public String getDirector() {
+        return director;
+    }
+
+    public Collection<String> getActores() {
+        return actores;
+    }
+
+    public TipoProyeccion getTipoProyeccion() {
+        return tipoProyeccion;
+    }
+
     public TipoGenero getGenero() {
         return genero;
     }

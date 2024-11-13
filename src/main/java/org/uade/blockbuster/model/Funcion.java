@@ -11,6 +11,14 @@ public class Funcion {
     private List<Entrada> entradas;
     private Sala sala;
 
+    public String getHorario() {
+        return horario;
+    }
+
+    public Sala getSala() {
+        return sala;
+    }
+
     public Pelicula getPelicula() {
         return pelicula;
     }
