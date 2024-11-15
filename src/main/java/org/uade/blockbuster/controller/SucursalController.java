@@ -50,11 +50,18 @@ public class SucursalController {
         }
     }
 
-    private Collection<Sala> buscarSalasPorSucursalId(int sucursalId) throws NotFoundException {
+    public Collection<Sala> buscarSalasPorSucursalId(int sucursalId) throws NotFoundException {
         return this.sucursales.stream()
                 .filter(sucursal -> sucursal.getSucursalId() == sucursalId)
                 .map(Sucursal::getSalas)
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("No existe una sucursal con id: " + sucursalId));
+    }
+
+    public Sala buscarSalaPorSalaId(int sucursalId, int salaId) throws NotFoundException {
+        return buscarSalasPorSucursalId(sucursalId).stream()
+                .filter(sala -> sala.getSalaId() == salaId)
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("No existe una sala con id: " + salaId));
     }
 }

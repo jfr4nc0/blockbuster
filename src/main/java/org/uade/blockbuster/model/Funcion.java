@@ -1,26 +1,34 @@
 package org.uade.blockbuster.model;
 
-import java.util.Date;
-import java.util.List;
+import lombok.AllArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Set;
+
+@AllArgsConstructor
 public class Funcion {
     private int funcionId;
     private Pelicula pelicula;
-    private String horario;
-    private Date fecha;
-    private List<Entrada> entradas;
+    private LocalTime horario;
+    private LocalDate fecha;
+    private Set<Entrada> entradas;
     private Sala sala;
 
-    public String getHorario() {
+    public Pelicula getPelicula() {
+        return pelicula;
+    }
+
+    public LocalTime getHorario() {
         return horario;
     }
 
-    public List<Entrada> getEntradas() {
+    public Set<Entrada> getEntradas() {
         return entradas;
     }
 
     public int getSalaId() {
-        return 0;
+        return sala.getSalaId();
     }
 
     public int getSucursalId() {
@@ -39,14 +47,23 @@ public class Funcion {
         return funcionId;
     }
 
-    public Date getFecha() {
+    public LocalDate getFecha() {
         return fecha;
     }
 
-    public Double calcularMontoPorEntradaDeLaPelicula() {
-        //TODO
-        return 0.00;
+    public double calcularMontoPorEntradaDeLaPelicula() {
+        return entradas.stream().mapToDouble(Entrada::getPrecio).findFirst().getAsDouble();
     }
 
-
+    @Override
+    public String toString() {
+        return "Funcion{" +
+                "funcionId=" + funcionId +
+                ", pelicula=" + pelicula +
+                ", horario='" + horario + '\'' +
+                ", fecha=" + fecha +
+                ", entradas=" + entradas +
+                ", sala=" + sala +
+                '}';
+    }
 }

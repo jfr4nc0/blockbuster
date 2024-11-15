@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public class DescuentoController {
@@ -31,6 +30,18 @@ public class DescuentoController {
             }
             return INSTANCE;
         }
+    }
+
+    public void agregarDescuento() {
+        //TODO
+    }
+
+    public void modificarDescuento() {
+        //TODO
+    }
+
+    public void eliminarDescuento() {
+        //TODO
     }
 
     public double procesadorDeDescuentosParaVenta(Venta venta) {

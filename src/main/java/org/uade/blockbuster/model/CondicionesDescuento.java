@@ -4,7 +4,6 @@ import org.uade.blockbuster.model.enums.TipoDescuento;
 import org.uade.blockbuster.model.enums.TipoTarjeta;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 public class CondicionesDescuento {

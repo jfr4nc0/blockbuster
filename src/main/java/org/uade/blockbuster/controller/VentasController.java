@@ -5,7 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.uade.blockbuster.controller.dto.TarjetaDescuentoDto;
 import org.uade.blockbuster.controller.dto.VentaDto;
 import org.uade.blockbuster.exceptions.NotFoundException;
-import org.uade.blockbuster.model.*;
+import org.uade.blockbuster.model.Combo;
+import org.uade.blockbuster.model.Funcion;
+import org.uade.blockbuster.model.Pelicula;
+import org.uade.blockbuster.model.TarjetaDescuento;
+import org.uade.blockbuster.model.Venta;
 import org.uade.blockbuster.model.enums.TipoGenero;
 import org.uade.blockbuster.model.enums.TipoTarjeta;
 
@@ -36,6 +40,18 @@ public class VentasController {
             }
             return INSTANCE;
         }
+    }
+
+    public void agregarVenta() {
+        //TODO
+    }
+
+    public void modificarVenta() {
+        //TODO
+    }
+
+    public void eliminarVenta() {
+        //TODO
     }
 
     public Collection<Venta> getVentas() {

@@ -1,12 +1,12 @@
 package org.uade.blockbuster.controller;
 
 import org.uade.blockbuster.controller.dto.ComboDto;
-import org.uade.blockbuster.exceptions.NotFoundException;
 import org.uade.blockbuster.model.Combo;
-import org.uade.blockbuster.model.CondicionesDescuento;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 public class CombosController {
     private static volatile CombosController INSTANCE;
@@ -29,8 +29,16 @@ public class CombosController {
         }
     }
 
-    public Collection<Combo> getCombos() {
-        return combos;
+    public void agregarCombo() {
+        //TODO
+    }
+
+    public void modificarCombo() {
+        //TODO
+    }
+
+    public void eliminarCombo() {
+        //TODO
     }
 
     public Combo buscarComboById(int comboId) {
