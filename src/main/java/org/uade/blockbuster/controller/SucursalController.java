@@ -2,12 +2,15 @@ package org.uade.blockbuster.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.uade.blockbuster.controller.dto.SalaDto;
+import org.uade.blockbuster.controller.dto.SucursalDto;
 import org.uade.blockbuster.exceptions.NotFoundException;
 import org.uade.blockbuster.model.Sala;
 import org.uade.blockbuster.model.Sucursal;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class SucursalController {
     private static volatile SucursalController INSTANCE;
@@ -17,6 +20,26 @@ public class SucursalController {
 
     private SucursalController() {
         this.sucursales = new ArrayList<Sucursal>();
+
+        cargaInicial();
+    }
+
+    private void cargaInicial() {
+        Sucursal cinemaDevoto = new Sucursal(1, "Cinema Devoto", "Quevedo 3365, Devoto, CABA",
+                List.of(
+                        new Sala(1, 1, "A", 130),
+                        new Sala(2, 1, "B", 110),
+                        new Sala(3, 1, "B", 100)
+                ));
+        Sucursal cinemarkPalermo = new Sucursal(1, "Cinemark Palermo", " Beruti 3399, Palermo, CABA",
+                List.of(
+                        new Sala(1, 1, "A", 130),
+                        new Sala(2, 1, "B", 110),
+                        new Sala(3, 1, "B", 100)
+                ));
+
+        sucursales.add(cinemaDevoto);
+        sucursales.add(cinemarkPalermo);
     }
 
     public static SucursalController getInstance() {
@@ -30,6 +53,10 @@ public class SucursalController {
             }
             return INSTANCE;
         }
+    }
+
+    public List<Sucursal> getSucursales() {
+        return sucursales.stream().toList();
     }
 
     public void agregarSucursal(String denominacion, String direccion) {
@@ -63,5 +90,23 @@ public class SucursalController {
                 .filter(sala -> sala.getSalaId() == salaId)
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("No existe una sala con id: " + salaId));
+    }
+
+    public List<SucursalDto> getSucursalesDto() {
+        return sucursales.stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    private SucursalDto toDto(Sucursal sucursal) {
+        return new SucursalDto(
+                sucursal.getSucursalId(),
+                sucursal.getDenominacion(),
+                sucursal.getDireccion(),
+                sucursal.getSalas().stream().map(this::toDto).toList());
+    }
+
+    private SalaDto toDto(Sala sala) {
+        return new SalaDto(sala.getSalaId(), sala.getDenominacion(), sala.getAsientos());
     }
 }

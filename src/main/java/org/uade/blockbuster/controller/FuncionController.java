@@ -47,7 +47,7 @@ public class FuncionController {
         }
     }
 
-    public void agregarFuncion(FuncionDto funcionDto) throws NotFoundException {
+    public int agregarFuncion(FuncionDto funcionDto) throws NotFoundException {
         Sala sala = new Sala();
         validarNuevaFuncion(funcionDto, sala);
 
@@ -59,6 +59,8 @@ public class FuncionController {
 
         funciones.add(funcion);
         log.info("Se agrego la funcion: ", funcion);
+
+        return funcion.getFuncionId();
     }
 
     private void validarNuevaFuncion(FuncionDto funcionDto, Sala sala) throws NotFoundException {

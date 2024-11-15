@@ -57,4 +57,11 @@ public class PeliculaDto {
     public int getPeliculaId() {
         return peliculaId;
     }
+
+    @Override
+    public String toString() {
+        return nombrePelicula +
+                " | " + genero +
+                " | " + tipoProyeccion;
+    }
 }

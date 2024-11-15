@@ -17,4 +17,13 @@ public class FuncionDto {
     private int sucursalId;
     private int salaId;
     private double precioEntrada;
+
+    public FuncionDto(int peliculaId, int sucursalId, int salaId, double precioEntrada, LocalTime horario, LocalDate fecha) {
+        this.peliculaId = peliculaId;
+        this.sucursalId = sucursalId;
+        this.salaId = salaId;
+        this.precioEntrada = precioEntrada;
+        this.horario = horario;
+        this.fecha = fecha;
+    }
 }
