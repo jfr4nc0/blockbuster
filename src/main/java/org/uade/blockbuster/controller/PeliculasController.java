@@ -58,10 +58,19 @@ public class PeliculasController {
                 .toList();
     }
 
-    public void agregarPelicula(PeliculaDto peliculaDto) {
+    public int agregarPelicula(PeliculaDto peliculaDto) {
         validarNuevaPelicula(peliculaDto);
 
 
+        return 0;
+    }
+
+    public List<String> getTiposGeneros() {
+        return TipoGenero.getAllGeneros();
+    }
+
+    public List<String> getTiposProyeccion() {
+        return TipoProyeccion.getAllProyecciones();
     }
 
     private void validarNuevaPelicula(PeliculaDto peliculaDto) {

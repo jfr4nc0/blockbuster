@@ -6,6 +6,8 @@ import org.uade.blockbuster.controller.SucursalController;
 import org.uade.blockbuster.controller.dto.FuncionDto;
 import org.uade.blockbuster.controller.dto.PeliculaDto;
 import org.uade.blockbuster.controller.dto.SucursalDto;
+import org.uade.blockbuster.model.Pelicula;
+import org.uade.blockbuster.model.enums.TipoGenero;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -22,6 +24,7 @@ import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 
 public class MenuPrincipal extends JFrame {
@@ -31,11 +34,12 @@ public class MenuPrincipal extends JFrame {
     private JTextField peliculaIdTxt, peliculaNombreTxt, generoPeliculaTxt, duracionPeliculaTxt, directorPeliculaTxt, actoresPeliculaTxt, tipoProyeccionTxt;
     private JTextField fechaFuncionTxt, horarioFuncionTxt, sucursalIdTxt, salaIdTxt, precioEntradaTxt;
 
-    private JButton registrarNuevaFuncion, registrarPelicula, consultarPeliculas, emitirReportePeliculasConMayorRecaudacion;
+    private JButton registrarNuevaFuncion, registrarNuevaPelicula, consultarPeliculas, emitirReportePeliculasConMayorRecaudacion;
     private JButton confirmarNuevaPelicula, confirmarNuevaFuncion, confirmarConsultarPeliculas, flushBtn;
 
     JComboBox<PeliculaDto> peliculasDisponiblesComboBox;
     JComboBox<SucursalDto> sucursalesDisponiblesComboBox;
+    JComboBox<String> generosDisponiblesComboBox, tiposProyeccionDisponiblesComboBox;
 
     private static final long serialVersionUUID = 1L;
     private JPanel contentPane;
@@ -73,6 +77,31 @@ public class MenuPrincipal extends JFrame {
     }
 
     private void initializeRegistrarPeliculaPorGeneroComponent() {
+        registrarNuevaPelicula.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                displayRegistrarNuevaPeliculaPorGeneroForm();
+            }
+        });
+        contentPane.add(registrarNuevaPelicula);
+
+        confirmarNuevaPelicula.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String genero = generosDisponiblesComboBox.getSelectedItem().toString();
+                    String nombrePelicula = peliculaNombreTxt.getText();
+                    int duracionEnMin = Integer.parseInt(duracionPeliculaTxt.getText());
+                    String director = directorPeliculaTxt.getText();
+                    List<String> actores = Arrays.stream(actoresPeliculaTxt.getText().toString().splitWithDelimiters(";", 0)).toList();
+                    String tipoProyeccion = tiposProyeccionDisponiblesComboBox.getSelectedItem().toString();
+
+                    PeliculaDto peliculaDto = new PeliculaDto(genero, nombrePelicula, duracionEnMin, director, actores, tipoProyeccion);
+                    int peliculaId = PeliculasController.getInstance().agregarPelicula(peliculaDto);
+                    JOptionPane.showMessageDialog(null, "Se agrego la pelicula con id: " + peliculaId, "Pelicula cargada con exito", JOptionPane.INFORMATION_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
 
     }
 
@@ -87,8 +116,8 @@ public class MenuPrincipal extends JFrame {
         confirmarNuevaFuncion.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    int sucursalId = Integer.parseInt(peliculaIdTxt.getText());
-                    int peliculaId = Integer.parseInt(peliculaIdTxt.getText());
+                    int sucursalId = ((SucursalDto) sucursalesDisponiblesComboBox.getSelectedItem()).getSucursalId();
+                    int peliculaId = ((PeliculaDto) peliculasDisponiblesComboBox.getSelectedItem()).getPeliculaId();
                     LocalTime horario = LocalTime.parse(generoPeliculaTxt.getText(), DateTimeFormatter.ofPattern("HH:mm"));
                     LocalDate fecha = LocalDate.parse(fechaFuncionTxt.getText(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
                     double precioEntrada = Double.parseDouble(precioEntradaTxt.getText());
@@ -96,12 +125,38 @@ public class MenuPrincipal extends JFrame {
 
                     FuncionDto nuevaFuncion = new FuncionDto(peliculaId, sucursalId, salaId, precioEntrada, horario, fecha);
                     int nuevaFuncionId = FuncionController.getInstance().agregarFuncion(nuevaFuncion);
-                    JOptionPane.showMessageDialog(null, "Se agrego la funcion con el id: " + nuevaFuncionId, "Carga con Exito", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Se agrego la funcion con el id: " + nuevaFuncionId, "Funcion cargada con exito", JOptionPane.INFORMATION_MESSAGE);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
+    }
+
+    private void displayRegistrarNuevaPeliculaPorGeneroForm() {
+        hideAllForms();
+
+        JPanel nuevaPeliculaPanel = new JPanel();
+        nuevaPeliculaPanel.setLayout(new BoxLayout(nuevaPeliculaPanel, BoxLayout.Y_AXIS));
+
+        nuevaPeliculaPanel.add(peliculaNombreLbl);
+        nuevaPeliculaPanel.add(peliculaNombreTxt);
+        nuevaPeliculaPanel.add(generoPeliculaLbl);
+        nuevaPeliculaPanel.add(generosDisponiblesComboBox);
+        nuevaPeliculaPanel.add(duracionPeliculaLbl);
+        nuevaPeliculaPanel.add(duracionPeliculaTxt);
+        nuevaPeliculaPanel.add(directorPeliculaLbl);
+        nuevaPeliculaPanel.add(directorPeliculaTxt);
+        nuevaPeliculaPanel.add(actoresPeliculaLbl);
+        nuevaPeliculaPanel.add(actoresPeliculaTxt);
+        nuevaPeliculaPanel.add(tipoProyeccionLbl);
+        nuevaPeliculaPanel.add(tiposProyeccionDisponiblesComboBox);
+        nuevaPeliculaPanel.add(registrarNuevaPelicula);
+
+        contentPane.add(nuevaPeliculaPanel);
+
+        contentPane.revalidate();
+        contentPane.repaint();
     }
 
     private void displayRegistrarNuevaFuncionPorGeneroForm() {
@@ -133,7 +188,7 @@ public class MenuPrincipal extends JFrame {
     private void hideAllForms() {
         contentPane.removeAll();
         contentPane.add(registrarNuevaFuncion);
-        contentPane.add(registrarPelicula);
+        contentPane.add(registrarNuevaPelicula);
         contentPane.add(consultarPeliculas);
         contentPane.add(emitirReportePeliculasConMayorRecaudacion);
         contentPane.revalidate();
@@ -146,7 +201,7 @@ public class MenuPrincipal extends JFrame {
         generoPeliculaLbl = new JLabel("Genero: ");
         duracionPeliculaLbl = new JLabel("Duracion: ");
         directorPeliculaLbl = new JLabel("Director: ");
-        actoresPeliculaLbl = new JLabel("Actores: ");
+        actoresPeliculaLbl = new JLabel("Actores (Delimiter by ';'): ");
         tipoProyeccionLbl = new JLabel("Tipo de Proyecto: ");
         fechaFuncionLbl = new JLabel("Fecha (Format: dd/MM/yyyy): ");
         horarioFuncionLbl = new JLabel("Hora (Format: HH:mm): ");
@@ -168,7 +223,7 @@ public class MenuPrincipal extends JFrame {
         precioEntradaTxt = new JTextField();
 
         registrarNuevaFuncion = new JButton("Registrar Nueva Funcion");
-        registrarPelicula = new JButton("Registrar Pelicula");
+        registrarNuevaPelicula = new JButton("Registrar Pelicula");
         consultarPeliculas = new JButton("Consultar Peliculas");
         emitirReportePeliculasConMayorRecaudacion = new JButton("Emitir Reporte Peliculas");
         confirmarNuevaFuncion = new JButton("Confirmar: ");
@@ -180,5 +235,11 @@ public class MenuPrincipal extends JFrame {
 
         List<SucursalDto> sucursalesDisponibles = SucursalController.getInstance().getSucursalesDto();
         sucursalesDisponiblesComboBox = new JComboBox<>(sucursalesDisponibles.toArray(new SucursalDto[0]));
+
+        List<String> generosDisponibles = PeliculasController.getInstance().getTiposGeneros();
+        generosDisponiblesComboBox = new JComboBox<>(generosDisponibles.toArray(new String[0]));
+
+        List<String> tiposProyeccionDisponibles = PeliculasController.getInstance().getTiposProyeccion();
+        tiposProyeccionDisponiblesComboBox = new JComboBox<>(tiposProyeccionDisponibles.toArray(new String[0]));
     }
 }

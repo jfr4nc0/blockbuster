@@ -1,7 +1,12 @@
 package org.uade.blockbuster.controller.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import java.util.Collection;
 
+@Getter
+@AllArgsConstructor
 public class PeliculaDto {
     private int peliculaId;
     private String genero;
@@ -11,16 +16,6 @@ public class PeliculaDto {
     private Collection<String> actores;
     private String tipoProyeccion;
 
-    public PeliculaDto(int peliculaId, String genero, String nombrePelicula, int duracionEnMinutos, String director, Collection<String> actores, String tipoProyeccion) {
-        this.peliculaId = peliculaId;
-        this.genero = genero;
-        this.nombrePelicula = nombrePelicula;
-        this.duracionEnMinutos = duracionEnMinutos;
-        this.director = director;
-        this.actores = actores;
-        this.tipoProyeccion = tipoProyeccion;
-    }
-
     public PeliculaDto(String genero, String nombrePelicula, int duracionEnMinutos, String director, Collection<String> actores, String tipoProyeccion) {
         this.genero = genero;
         this.nombrePelicula = nombrePelicula;
@@ -28,34 +23,6 @@ public class PeliculaDto {
         this.director = director;
         this.actores = actores;
         this.tipoProyeccion = tipoProyeccion;
-    }
-
-    public String getGenero() {
-        return genero;
-    }
-
-    public String getNombrePelicula() {
-        return nombrePelicula;
-    }
-
-    public int getDuracionEnMinutos() {
-        return duracionEnMinutos;
-    }
-
-    public String getDirector() {
-        return director;
-    }
-
-    public Collection<String> getActores() {
-        return actores;
-    }
-
-    public String getTipoProyeccion() {
-        return tipoProyeccion;
-    }
-
-    public int getPeliculaId() {
-        return peliculaId;
     }
 
     @Override
