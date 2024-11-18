@@ -48,14 +48,26 @@ public class FuncionController {
     }
 
     public int agregarFuncion(FuncionDto funcionDto) throws NotFoundException {
+        return agregarFuncion(
+                funcionDto.getPeliculaId(),
+                funcionDto.getHorario(),
+                funcionDto.getFecha(),
+                funcionDto.getPrecioEntrada(),
+                funcionDto.getSucursalId(),
+                funcionDto.getSalaId()
+        );
+    }
+
+    public int agregarFuncion(int peliculaId, LocalTime horario, LocalDate fecha, double precioEntrada, int sucursalId, int salaId) throws NotFoundException {
         Sala sala = new Sala();
-        validarNuevaFuncion(funcionDto, sala);
+        validarNuevaFuncion(peliculaId, horario, fecha, precioEntrada, sucursalId, salaId, sala);
 
-        Pelicula pelicula = PeliculasController.getInstance().buscarPeliculaById(funcionDto.getPeliculaId());
-        Set<Entrada> entradas = crearEntradas(sala.getAsientos(), funcionDto.getPrecioEntrada());
+        Pelicula pelicula = PeliculasController.getInstance().buscarPeliculaById(peliculaId);
+        Set<Entrada> entradas = crearEntradas(sala.getAsientos(), precioEntrada);
 
-        Funcion funcion = new Funcion(calcularFuncionId(), pelicula, funcionDto.getHorario(), funcionDto.getFecha(), entradas, sala);
-        entradas.stream().forEach(entrada -> entrada.setFuncion(funcion));
+        Funcion funcion = new Funcion(calcularFuncionId(), pelicula, horario, fecha, entradas, sala);
+        entradas.stream()
+                .forEach(entrada -> entrada.setFuncion(funcion));
 
         funciones.add(funcion);
         log.info("Se agrego la funcion: ", funcion);
@@ -63,32 +75,30 @@ public class FuncionController {
         return funcion.getFuncionId();
     }
 
-    private void validarNuevaFuncion(FuncionDto funcionDto, Sala sala) throws NotFoundException {
-        if (Objects.nonNull(funcionDto.getFuncionId()) && existeFuncionById(funcionDto.getFuncionId())) throw new IllegalArgumentException("Ya existe la funcion con el id:" + funcionDto.getFuncionId());
+    private void validarNuevaFuncion(int peliculaId, LocalTime horario, LocalDate fecha, double precioEntrada, int sucursalId, int salaId, Sala sala) throws NotFoundException {
+        if (Objects.isNull(peliculaId)) throw new IllegalArgumentException("El peliculaId no puede ser nulo");
+        if (Objects.isNull(horario)) throw new IllegalArgumentException("El horario no puede ser nulo");
+        if (Objects.isNull(fecha)) throw new IllegalArgumentException("La fecha no puede ser nulo");
+        if (Objects.isNull(precioEntrada)) throw new IllegalArgumentException("El precio de entrada no puede ser nulo");
+        if (Objects.isNull(sucursalId)) throw new IllegalArgumentException("El salaId no puede ser nulo");
+        if (Objects.isNull(salaId)) throw new IllegalArgumentException("El salaId no puede ser nulo");
 
-        if (Objects.isNull(funcionDto.getPeliculaId())) throw new IllegalArgumentException("El peliculaId no puede ser nulo");
-        if (Objects.isNull(funcionDto.getHorario())) throw new IllegalArgumentException("El horario no puede ser nulo");
-        if (Objects.isNull(funcionDto.getFecha())) throw new IllegalArgumentException("La fecha no puede ser nulo");
-        if (Objects.isNull(funcionDto.getPrecioEntrada())) throw new IllegalArgumentException("El precio de entrada no puede ser nulo");
-        if (Objects.isNull(funcionDto.getSucursalId())) throw new IllegalArgumentException("El salaId no puede ser nulo");
-        if (Objects.isNull(funcionDto.getSalaId())) throw new IllegalArgumentException("El salaId no puede ser nulo");
-
-        sala = SucursalController.getInstance().buscarSalaPorSalaId(funcionDto.getSucursalId(), funcionDto.getSalaId());
+        sala = SucursalController.getInstance().buscarSalaPorSalaId(sucursalId, salaId);
         List<Funcion> funcionesExistentesMismaFecha = buscarFuncionesBySalaId(sala.getSalaId()).stream()
-                .filter(funcion -> funcion.getFecha().isEqual(funcionDto.getFecha()))
+                .filter(funcionSub -> funcionSub.getFecha().isEqual(funcionSub.getFecha()))
                 .toList();
 
-        Pelicula peliculaPorAgendar = PeliculasController.getInstance().buscarPeliculaById(funcionDto.getPeliculaId());
+        Pelicula peliculaPorAgendar = PeliculasController.getInstance().buscarPeliculaById(peliculaId);
 
         List<LocalTime> horariosFinFuncionAgendadas = funcionesExistentesMismaFecha.stream()
-                .map(funcion -> getHorarioFinDeFuncion(funcion))
+                .map(funcionSub -> getHorarioFinDeFuncion(funcionSub))
                 .collect(Collectors.toList());
 
-        LocalTime horarioFinFuncionPorAgendar = funcionDto.getHorario().plusMinutes(peliculaPorAgendar.getDuracionEnMinutos() + 15);
+        LocalTime horarioFinFuncionPorAgendar = horario.plusMinutes(peliculaPorAgendar.getDuracionEnMinutos() + 15);
 
         boolean horarioDisponible = horariosFinFuncionAgendadas.stream()
                 .noneMatch(horarioFin ->
-                        horarioFin.isAfter(funcionDto.getHorario()) &&
+                        horarioFin.isAfter(horario) &&
                         horarioFin.isBefore(horarioFinFuncionPorAgendar)
                 );
 
@@ -214,5 +224,10 @@ public class FuncionController {
         return entradas.stream()
                 .map(this::toDto)
                 .toList();
+    }
+
+    public Entrada toModel(EntradaDto entradaDto, int funcionId) throws NotFoundException {
+        Funcion funcion = buscarFuncionById(funcionId);
+        return new Entrada(entradaDto.getNroAsiento(), entradaDto.getPrecio(), funcion);
     }
 }

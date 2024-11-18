@@ -3,20 +3,19 @@ package org.uade.blockbuster.controller;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.uade.blockbuster.controller.dto.PeliculaDto;
-import org.uade.blockbuster.controller.dto.RecaudacionPorPeliculaDto;
-import org.uade.blockbuster.controller.dto.TarjetaDescuentoDto;
-import org.uade.blockbuster.controller.dto.VentaDto;
+import org.uade.blockbuster.controller.dto.*;
 import org.uade.blockbuster.exceptions.NotFoundException;
-import org.uade.blockbuster.model.Combo;
-import org.uade.blockbuster.model.Funcion;
-import org.uade.blockbuster.model.Pelicula;
-import org.uade.blockbuster.model.TarjetaDescuento;
-import org.uade.blockbuster.model.Venta;
+import org.uade.blockbuster.model.*;
 import org.uade.blockbuster.model.enums.TipoGenero;
 import org.uade.blockbuster.model.enums.TipoTarjeta;
 
-import java.util.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class VentasController {
@@ -42,8 +41,45 @@ public class VentasController {
         }
     }
 
-    public void agregarVenta() {
-        //TODO
+    public int agregarVenta(VentaDto ventaDto) throws NotFoundException {
+        return agregarVenta(
+                ventaDto.getFechaVenta(),
+                ventaDto.getCombos().stream().map(ComboDto::getComboId).toList(),
+                ventaDto.getFuncion().getFuncionId(),
+                DescuentoController.toModel(ventaDto.getTarjetaDescuento()),
+                ventaDto.getEntradas().stream().map(entradaDto -> {
+                    try {
+                        return FuncionController.getInstance().toModel(entradaDto, ventaDto.getFuncion().getFuncionId());
+                    } catch (NotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).toList()
+        );
+    }
+
+    public int agregarVenta(LocalDate fechaVenta, List<Integer> combosId, int funcionId, TarjetaDescuento tarjetaDescuento, List<Entrada> entradas) throws NotFoundException {
+        validarNuevaVentaParamsObligatorios(fechaVenta, funcionId, entradas);
+
+        List<Combo> combos = CombosController.getInstance().getCombosByCombosId(combosId);
+        Funcion funcion = FuncionController.getInstance().buscarFuncionById(funcionId);
+
+        Venta venta = new Venta(calcularVentaId(), fechaVenta, combos, funcion, tarjetaDescuento, entradas);
+
+        ventas.add(venta);
+
+        log.info("Se agrego la venta con el id: " + venta.getVentaId());
+
+        return venta.getVentaId();
+    }
+
+    private int calcularVentaId() {
+        return ventas.size() + 1;
+    }
+
+    private void validarNuevaVentaParamsObligatorios(LocalDate fechaVenta, int funcionId, List<Entrada> entradas) {
+        if (Objects.isNull(fechaVenta)) throw new IllegalArgumentException("fechaVenta no puede ser null");
+        if (Objects.isNull(funcionId)) throw new IllegalArgumentException("funcionId no puede ser null");
+        if (Objects.isNull(entradas) || entradas.isEmpty()) throw new IllegalArgumentException("entradas no pueden ser null");
     }
 
     public void modificarVenta() {
@@ -145,7 +181,7 @@ public class VentasController {
     public VentaDto toDto(Venta venta) throws NotFoundException {
         return new VentaDto(
                 venta.getVentaId(),
-                venta.getFechaVenta().toString(),
+                venta.getFechaVenta(),
                 CombosController.getInstance().getCombosDtoByCombosId(venta.getListaComboId()),
                 FuncionController.getInstance().toDto(venta.getFuncion()),
                 toDto(venta.getTarjetaDescuento()),
@@ -159,12 +195,19 @@ public class VentasController {
                 tarjetaDescuento.getTipoTarjeta().toString());
     }
 
-    @SneakyThrows
     public List<RecaudacionPorPeliculaDto> getPeliculasConMayorRecaudacion() {
         return ventas.stream()
                 .map(Venta::getPeliculaId)
                 .distinct()
-                .map(this::getRecaudacionPorPelicula)
+                .map(peliculaId -> {
+                    try {
+                        return getRecaudacionPorPelicula(peliculaId);
+                    } catch (NotFoundException e) {
+                        log.error("No se encontro pelicula con ID: " + peliculaId);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
                 .sorted(Comparator.comparingDouble(RecaudacionPorPeliculaDto::getRecaudacionTotal).reversed())
                 .toList();
     }

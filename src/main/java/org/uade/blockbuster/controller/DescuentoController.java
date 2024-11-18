@@ -1,9 +1,8 @@
 package org.uade.blockbuster.controller;
 
-import org.uade.blockbuster.model.Combo;
-import org.uade.blockbuster.model.CondicionesDescuento;
-import org.uade.blockbuster.model.Entrada;
-import org.uade.blockbuster.model.Venta;
+import org.uade.blockbuster.controller.dto.TarjetaDescuentoDto;
+import org.uade.blockbuster.model.*;
+import org.uade.blockbuster.model.enums.TipoTarjeta;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -111,5 +110,12 @@ public class DescuentoController {
     private double aplicarDescuento(Combo combo, double descuento) {
         if (descuento >= 1 || descuento < 0) throw new IllegalArgumentException("Descuento invalido, rango de descuento: 0 < descuento < 1");
         return combo.getPrecio() * (1 - descuento);
+    }
+
+    public static TarjetaDescuento toModel(TarjetaDescuentoDto tarjetaDescuentoDto) {
+        return new TarjetaDescuento(
+                tarjetaDescuentoDto.getTarjetaId(),
+                TipoTarjeta.valueOf(tarjetaDescuentoDto.getTipoTarjeta())
+        );
     }
 }
