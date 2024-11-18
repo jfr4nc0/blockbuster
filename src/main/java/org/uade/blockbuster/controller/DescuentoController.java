@@ -1,7 +1,11 @@
 package org.uade.blockbuster.controller;
 
 import org.uade.blockbuster.controller.dto.TarjetaDescuentoDto;
-import org.uade.blockbuster.model.*;
+import org.uade.blockbuster.model.Combo;
+import org.uade.blockbuster.model.CondicionesDescuento;
+import org.uade.blockbuster.model.Entrada;
+import org.uade.blockbuster.model.TarjetaDescuento;
+import org.uade.blockbuster.model.Venta;
 import org.uade.blockbuster.model.enums.TipoTarjeta;
 
 import java.time.LocalDate;

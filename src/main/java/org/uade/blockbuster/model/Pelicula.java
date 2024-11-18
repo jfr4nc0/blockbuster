@@ -17,8 +17,4 @@ public class Pelicula {
     private String director;
     private Collection<String> actores;
     private TipoProyeccion tipoProyeccion;
-
-    public void setGenero(TipoGenero genero) {
-        this.genero = genero;
-    }
 }

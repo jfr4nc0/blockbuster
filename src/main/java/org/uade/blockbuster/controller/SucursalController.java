@@ -25,21 +25,20 @@ public class SucursalController {
     }
 
     private void cargaInicial() {
-        Sucursal cinemaDevoto = new Sucursal(1, "Cinema Devoto", "Quevedo 3365, Devoto, CABA",
-                List.of(
-                        new Sala(1, 1, "A", 130),
-                        new Sala(2, 1, "B", 110),
-                        new Sala(3, 1, "B", 100)
-                ));
-        Sucursal cinemarkPalermo = new Sucursal(1, "Cinemark Palermo", " Beruti 3399, Palermo, CABA",
-                List.of(
-                        new Sala(1, 1, "A", 130),
-                        new Sala(2, 1, "B", 110),
-                        new Sala(3, 1, "B", 100)
-                ));
+        int sucursalId1 = agregarSucursal("Cinema Devoto", "Quevedo 3365, Devoto, CABA");
+        int sucursalId2 = agregarSucursal("Cinemark Palermo", "Beruti 3399, Palermo, CABA");
 
-        sucursales.add(cinemaDevoto);
-        sucursales.add(cinemarkPalermo);
+        try {
+            agregarSala(sucursalId1, "A", 130);
+            agregarSala(sucursalId1, "B", 110);
+            agregarSala(sucursalId1, "C", 100);
+
+            agregarSala(sucursalId2, "A", 130);
+            agregarSala(sucursalId2, "B", 110);
+            agregarSala(sucursalId2, "C", 100);
+        } catch (NotFoundException e) {
+            log.error("Error al agregar sala: " + e.getMessage());
+        }
     }
 
     public static SucursalController getInstance() {
@@ -59,22 +58,24 @@ public class SucursalController {
         return sucursales.stream().toList();
     }
 
-    public void agregarSucursal(String denominacion, String direccion) {
+    public int agregarSucursal(String denominacion, String direccion) {
         int sucursalId = this.sucursales.size() + 1;
         sucursales.add(new Sucursal(sucursalId, denominacion, direccion));
+        log.info("Se agrego la sucursal id: " + sucursalId);
+
+        return sucursalId;
     }
 
-    public void agregarSala(int sucursalId, String denominacion, int asientos) {
-        try {
-            Collection<Sala> salas = buscarSalasPorSucursalId(sucursalId);
+    public int agregarSala(int sucursalId, String denominacion, int asientos) throws NotFoundException {
+        Collection<Sala> salas = buscarSalasPorSucursalId(sucursalId);
 
-            int salaId = salas.size() + 1;
-            Sala sala = new Sala(salaId, sucursalId, denominacion, asientos);
+        int salaId = salas.size() + 1;
+        Sala sala = new Sala(salaId, sucursalId, denominacion, asientos);
 
-            salas.add(sala);
-        } catch (NotFoundException e) {
-            log.error(e.getMessage());
-        }
+        salas.add(sala);
+        log.info("Se agrego la sala con id: " + salaId);
+
+        return salaId;
     }
 
     public Collection<Sala> buscarSalasPorSucursalId(int sucursalId) throws NotFoundException {

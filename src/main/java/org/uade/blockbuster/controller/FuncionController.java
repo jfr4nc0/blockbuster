@@ -32,6 +32,20 @@ public class FuncionController {
 
     private FuncionController() {
         this.funciones = new ArrayList<Funcion>();
+        
+        cargaInicial();
+    }
+
+    private void cargaInicial() {
+        try {
+            agregarFuncion(1, LocalTime.now(), LocalDate.now(), 2000, 1, 1);
+            agregarFuncion(2, LocalTime.now(), LocalDate.now(), 2500, 1, 2);
+            agregarFuncion(2, LocalTime.now(), LocalDate.now(), 3000, 2, 1);
+            agregarFuncion(3, LocalTime.now(), LocalDate.now(), 2200, 1, 3);
+            agregarFuncion(3, LocalTime.now(), LocalDate.now(), 2800, 2, 2);
+        } catch (NotFoundException e) {
+            log.error("Error al cargar funciones: " + e.getMessage());
+        }
     }
 
     public static FuncionController getInstance() {

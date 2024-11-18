@@ -14,6 +14,11 @@ public class CombosController {
 
     public CombosController() {
         combos = new ArrayList<Combo>();
+
+        cargaInicial();
+    }
+
+    private void cargaInicial() {
     }
 
     public static CombosController getInstance() {

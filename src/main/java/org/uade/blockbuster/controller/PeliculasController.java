@@ -1,5 +1,6 @@
 package org.uade.blockbuster.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.uade.blockbuster.controller.dto.PeliculaDto;
 import org.uade.blockbuster.exceptions.NotFoundException;
 import org.uade.blockbuster.model.Pelicula;
@@ -13,6 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+@Slf4j
 public class PeliculasController {
     private static volatile PeliculasController INSTANCE;
     private Collection<Pelicula> peliculas;
@@ -24,19 +26,15 @@ public class PeliculasController {
     }
 
     private void cargaInicial() {
-        Pelicula laSustancia = new Pelicula(1, TipoGenero.TERROR, "La sustancia", 150, "Coralie Fargeat",
+        agregarPelicula("La sustancia", "Coralie Fargeat", TipoGenero.TERROR, 150,
                 List.of("Demi Moore", "Margaret Qualley", "Dennis Quaid", "Gore Abrams", "Hugo Diego Garcia", "Olivier Raynal", "Tiffany Hofstetter", "Tom Morton", "Jiselle Burkhalter", "Axel Baille"),
                 TipoProyeccion.DOS_D);
-        Pelicula elJoker2 = new Pelicula(2, TipoGenero.DRAMA, "JOKER 2", 120, "Todd Phillips",
+        agregarPelicula("JOKER 2", "Todd Phillips", TipoGenero.DRAMA, 120,
                 List.of("Joaquin Phoenix", "Lady Gaga", "Brendan Gleeson", "Catherine Keener", "Zazie Beetz", "Jacob Lofland", "Harry Lawtey", "Ken Leung", "Steve Coogan", "Gattlin Griffith", "Bill Smitrovich"),
                 TipoProyeccion.DOS_D);
-        Pelicula noTeSueltes = new Pelicula(3, TipoGenero.SUSPENSO, "No te sueltes", 130, "Alexandre Aja",
+        agregarPelicula("No te sueltes", "Alexandre Aja", TipoGenero.SUSPENSO, 130,
                 List.of("Halle Berry", "Matthew Kevin Anderson", "Stephanie Lavigne", "Christin Park", "Percy Daggs", "Anthony B. Jenkins"),
                 TipoProyeccion.TRES_D);
-
-        peliculas.add(laSustancia);
-        peliculas.add(elJoker2);
-        peliculas.add(noTeSueltes);
     }
 
     public static PeliculasController getInstance() {
@@ -66,10 +64,26 @@ public class PeliculasController {
     }
 
     public int agregarPelicula(PeliculaDto peliculaDto) {
-        validarNuevaPelicula(peliculaDto);
+        return agregarPelicula(
+                peliculaDto.getNombrePelicula(),
+                peliculaDto.getDirector(),
+                TipoGenero.valueOf(peliculaDto.getGenero()),
+                peliculaDto.getDuracionEnMinutos(),
+                peliculaDto.getActores(),
+                TipoProyeccion.valueOf(peliculaDto.getTipoProyeccion())
+        );
+    }
 
+    public int agregarPelicula(String nombrePelicula, String director, TipoGenero genero, int duracionEnMin, Collection<String> actores, TipoProyeccion tipoProyeccion) {
+        validarNuevaPelicula(nombrePelicula, director, genero, tipoProyeccion);
 
-        return 0;
+        int peliculaId = peliculas.size() + 1;
+        Pelicula pelicula = new Pelicula(peliculaId, genero, nombrePelicula, duracionEnMin, director, actores, tipoProyeccion);
+
+        peliculas.add(pelicula);
+        log.info("Se agrego la pelicula id: " + peliculaId);
+
+        return peliculaId;
     }
 
     public List<String> getTiposGeneros() {
@@ -80,20 +94,20 @@ public class PeliculasController {
         return TipoProyeccion.getAllProyecciones();
     }
 
-    private void validarNuevaPelicula(PeliculaDto peliculaDto) {
-        if (Objects.isNull(peliculaDto.getNombrePelicula())) throw new IllegalArgumentException("El nombre pelicula no puede ser nulo");
-        if (Objects.isNull(peliculaDto.getDirector())) throw new IllegalArgumentException("El director no puede ser nulo");
-        if (Objects.isNull(peliculaDto.getGenero())) throw new IllegalArgumentException("El genero no puede ser nulo");
-        if (Objects.isNull(peliculaDto.getTipoProyeccion())) throw new IllegalArgumentException("El tipo de proyeccion no puede ser nulo");
-        if (existePelicula(peliculaDto.getNombrePelicula(), peliculaDto.getDirector(), peliculaDto.getGenero(), peliculaDto.getTipoProyeccion())) throw new IllegalArgumentException("El pelicula ya existe");
+    private void validarNuevaPelicula(String nombrePelicula, String director, TipoGenero genero, TipoProyeccion tipoProyeccion) {
+        if (Objects.isNull(nombrePelicula)) throw new IllegalArgumentException("El nombre pelicula no puede ser nulo");
+        if (Objects.isNull(director)) throw new IllegalArgumentException("El director no puede ser nulo");
+        if (Objects.isNull(genero)) throw new IllegalArgumentException("El genero no puede ser nulo");
+        if (Objects.isNull(tipoProyeccion)) throw new IllegalArgumentException("El tipo de proyeccion no puede ser nulo");
+        if (existePelicula(nombrePelicula, director, genero, tipoProyeccion)) throw new IllegalArgumentException("El pelicula ya existe");
     }
 
-    public boolean existePelicula(String titulo, String director, String genero, String tipoProyeccion) {
+    public boolean existePelicula(String titulo, String director, TipoGenero genero, TipoProyeccion tipoProyeccion) {
         return peliculas.stream()
                 .anyMatch(pelicula -> pelicula.getNombrePelicula().equals(titulo) &&
                         pelicula.getDirector().equals(director) &&
-                        pelicula.getGenero().equals(TipoGenero.valueOf(genero)) &&
-                        pelicula.getTipoProyeccion().equals(TipoProyeccion.valueOf(tipoProyeccion)));
+                        pelicula.getGenero().equals(genero) &&
+                        pelicula.getTipoProyeccion().equals(tipoProyeccion));
     }
 
     public Pelicula buscarPeliculaById(int peliculaId) throws NotFoundException {

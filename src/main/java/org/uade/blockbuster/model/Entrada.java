@@ -13,6 +13,10 @@ public class Entrada {
         this.precio = precio;
     }
 
+    public Entrada(int nroAsiento) {
+        this.nroAsiento = nroAsiento;
+    }
+
     public void setFuncion(Funcion funcion) {
         this.funcion = funcion;
     }
