@@ -29,6 +29,10 @@ public class Entrada {
         return precio;
     }
 
+    public void setPrecio(double precio) {
+        this.precio = precio;
+    }
+
     public int getFuncionId() {
         return funcion.getFuncionId();
     }

@@ -13,20 +13,16 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class CondicionesDescuento {
+    private int condicionDescuentoId;
     private LocalDate fechaDesde;
     private LocalDate fechaHasta;
     private int diaSemana;
-    private Double porcentaje;
+    private double porcentaje;
     private TipoTarjeta tipoTarjeta;
     private List<TarjetaDescuento> tarjetasDescuento;
     private TipoDescuento tipoDescuento;
 
-    public Double getDescuento() {
+    public double getDescuento() {
         return this.porcentaje / 100.00;
-    }
-
-    public Double getDescuentoPorTarjeta(TipoTarjeta tipoTarjeta) {
-        //TODO
-        return null;
     }
 }

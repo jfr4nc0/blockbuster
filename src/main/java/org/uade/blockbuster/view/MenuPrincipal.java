@@ -8,8 +8,6 @@ import org.uade.blockbuster.controller.dto.FuncionDto;
 import org.uade.blockbuster.controller.dto.PeliculaDto;
 import org.uade.blockbuster.controller.dto.RecaudacionPorPeliculaDto;
 import org.uade.blockbuster.controller.dto.SucursalDto;
-import org.uade.blockbuster.model.Pelicula;
-import org.uade.blockbuster.model.enums.TipoGenero;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -250,28 +248,28 @@ public class MenuPrincipal extends JFrame {
     private void displayEmitirReportePeliculasConMayorRecaudacion() {
         hideAllForms();
 
-        JPanel reporte = new JPanel();
-        reporte.setLayout(new BoxLayout(reporte, BoxLayout.Y_AXIS));
-
         List<RecaudacionPorPeliculaDto> peliculas = VentasController.getInstance().getPeliculasConMayorRecaudacion();
         if (Objects.nonNull(peliculas) && !peliculas.isEmpty()){
-            peliculas.forEach(peliculaDto -> this.displayPelicula(peliculaDto, reporte));
+            peliculas.forEach(this::displayPelicula);
         } else {
             JOptionPane.showMessageDialog(null, "No se encontraron peliculas");
         }
-        contentPane.add(reporte);
-
-        contentPane.revalidate();
-        contentPane.repaint();
     }
 
-    private void displayPelicula(RecaudacionPorPeliculaDto recaudacionPorPeliculaDto, JPanel panel) {
+    private void displayPelicula(RecaudacionPorPeliculaDto recaudacionPorPeliculaDto) {
+        //JPanel reporte = new JPanel();
+        //reporte.setLayout(new BoxLayout(reporte, BoxLayout.Y_AXIS));
+
         peliculaNombreLbl.setText("Pelicula: " + recaudacionPorPeliculaDto.getPeliculaDto().getNombrePelicula());
-        panel.add(peliculaNombreLbl);
+        contentPane.add(peliculaNombreLbl);
         generoPeliculaLbl.setText("Genero: " + recaudacionPorPeliculaDto.getPeliculaDto().getGenero());
-        panel.add(generoPeliculaLbl);
+        contentPane.add(generoPeliculaLbl);
         recaudacionPeliculaLbl.setText("Recaudacion Total: " + recaudacionPorPeliculaDto.getRecaudacionTotal());
-        panel.add(recaudacionPeliculaLbl);
+        contentPane.add(recaudacionPeliculaLbl);
+
+        //contentPane.add(reporte);
+        contentPane.revalidate();
+        contentPane.repaint();
     }
 
     private void hideAllForms() {
@@ -293,6 +291,7 @@ public class MenuPrincipal extends JFrame {
         sucursalIdLbl = new JLabel("Sucursal: ");
         salaIdLbl = new JLabel("Sala: ");
         precioEntradaLbl = new JLabel("Precio Entrada: ");
+        recaudacionPeliculaLbl = new JLabel("Recaudacion: ");
 
         peliculaIdTxt = new JTextField();
         peliculaNombreTxt = new JTextField();

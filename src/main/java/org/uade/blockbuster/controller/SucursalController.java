@@ -1,5 +1,6 @@
 package org.uade.blockbuster.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uade.blockbuster.controller.dto.SalaDto;
@@ -12,11 +13,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+@Slf4j
 public class SucursalController {
     private static volatile SucursalController INSTANCE;
     private Collection<Sucursal> sucursales;
-
-    private static final Logger log = LoggerFactory.getLogger(SucursalController.class);
 
     private SucursalController() {
         this.sucursales = new ArrayList<Sucursal>();

@@ -1,5 +1,6 @@
 package org.uade.blockbuster.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uade.blockbuster.controller.dto.ComboDto;
@@ -26,11 +27,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class VentasController {
     private static volatile VentasController INSTANCE;
     private Collection<Venta> ventas;
-
-    private static final Logger log = LoggerFactory.getLogger(VentasController.class);
 
     private VentasController() {
         this.ventas = new ArrayList<Venta>();
@@ -40,17 +40,17 @@ public class VentasController {
 
     private void cargaInicial() {
         try {
-            agregarVenta(LocalDate.now(), List.of(1, 2), 1, new TarjetaDescuento(54, TipoTarjeta.LA_NACION),
+            agregarVenta(LocalDate.now(), List.of(1, 2), 1, new TarjetaDescuento(123, TipoTarjeta.LA_NACION),
                     List.of(new Entrada(1),new Entrada(2)));
             agregarVenta(LocalDate.now(), List.of(), 1, null,
                     List.of(new Entrada(3),new Entrada(4),new Entrada(5)));
-            agregarVenta(LocalDate.now(), List.of(), 2, new TarjetaDescuento(23, TipoTarjeta.CLARIN_365),
+            agregarVenta(LocalDate.now(), List.of(), 2, new TarjetaDescuento(124, TipoTarjeta.CLARIN_365),
                     List.of(new Entrada(1)));
             agregarVenta(LocalDate.now(), List.of(1), 2, null,
                     List.of(new Entrada(2),new Entrada(3)));
             agregarVenta(LocalDate.now(), List.of(2), 3, null,
                     List.of(new Entrada(1),new Entrada(2),new Entrada(3)));
-            agregarVenta(LocalDate.now(), List.of(), 4, new TarjetaDescuento(66, TipoTarjeta.UADE),
+            agregarVenta(LocalDate.now(), List.of(), 4, new TarjetaDescuento(125, TipoTarjeta.UADE),
                     List.of(new Entrada(1),new Entrada(2)));
             agregarVenta(LocalDate.now(), List.of(1), 4, null,
                     List.of(new Entrada(1),new Entrada(2),new Entrada(3)));
@@ -94,6 +94,9 @@ public class VentasController {
 
         List<Combo> combos = CombosController.getInstance().getCombosByCombosId(combosId);
 
+        entradas.forEach(entrada -> entrada.setFuncion(funcion));
+        entradas.forEach(entrada -> entrada.setPrecio(funcion.calcularMontoPorEntradaDeLaPelicula()));
+
         int ventaId = ventas.size() + 1;
         Venta venta = new Venta(ventaId, fechaVenta, combos, funcion, tarjetaDescuento, entradas);
 
@@ -107,9 +110,6 @@ public class VentasController {
         if (Objects.isNull(fechaVenta)) throw new IllegalArgumentException("fechaVenta no puede ser null");
         if (Objects.isNull(funcionId)) throw new IllegalArgumentException("funcionId no puede ser null");
         if (Objects.isNull(entradas) || entradas.isEmpty()) throw new IllegalArgumentException("entradas no pueden ser null");
-        if (entradas.stream()
-                .filter(entrada -> Objects.nonNull(entrada.getFuncionId()))
-                .anyMatch(entrada -> entrada.getFuncionId() != funcionId)) throw new IllegalArgumentException("Existen entradas que no corresponden a la funcion id: " + funcionId);
     }
 
     public void modificarVenta() {

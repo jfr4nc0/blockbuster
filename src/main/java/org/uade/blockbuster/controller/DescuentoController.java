@@ -1,25 +1,80 @@
 package org.uade.blockbuster.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.uade.blockbuster.controller.dto.TarjetaDescuentoDto;
 import org.uade.blockbuster.model.Combo;
 import org.uade.blockbuster.model.CondicionesDescuento;
 import org.uade.blockbuster.model.Entrada;
 import org.uade.blockbuster.model.TarjetaDescuento;
 import org.uade.blockbuster.model.Venta;
+import org.uade.blockbuster.model.enums.TipoDescuento;
 import org.uade.blockbuster.model.enums.TipoTarjeta;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
+@Slf4j
 public class DescuentoController {
     private static volatile DescuentoController INSTANCE;
     private Collection<CondicionesDescuento> descuentos;
 
     private DescuentoController() {
         this.descuentos = new ArrayList<CondicionesDescuento>();
+
+        cargaInicial();
+    }
+
+    private void cargaInicial() {
+        List<TarjetaDescuento> tarjetaDescuentos = List.of(
+                new TarjetaDescuento(123, TipoTarjeta.LA_NACION),
+                new TarjetaDescuento(124, TipoTarjeta.CLARIN_365),
+                new TarjetaDescuento(125, TipoTarjeta.UADE)
+        );
+
+        agregarDescuento(
+                null,
+                null,
+                1,
+                50,
+                null,
+                null,
+                TipoDescuento.ENTRADA);
+        agregarDescuento(
+                null,
+                null,
+                2,
+                50,
+                null,
+                null,
+                TipoDescuento.ENTRADA);
+        agregarDescuento(
+                null,
+                null,
+                3,
+                50,
+                null,
+                null,
+                TipoDescuento.ENTRADA);
+        agregarDescuento(
+                LocalDate.now().minusDays(1),
+                LocalDate.now().plusDays(1),
+                4,
+                15,
+                TipoTarjeta.LA_NACION,
+                tarjetaDescuentos,
+                TipoDescuento.TODO);
+        agregarDescuento(
+                LocalDate.now().minusDays(1),
+                LocalDate.now().plusDays(1),
+                5,
+                20,
+                TipoTarjeta.CLARIN_365,
+                tarjetaDescuentos,
+                TipoDescuento.COMBO);
     }
 
     public static DescuentoController getInstance() {
@@ -35,8 +90,14 @@ public class DescuentoController {
         }
     }
 
-    public void agregarDescuento() {
-        //TODO
+    public int agregarDescuento(LocalDate fchDesde, LocalDate fchaHasta, int diaSemana, double porcentaje, TipoTarjeta tipoTarjeta, List<TarjetaDescuento> tarjetasDescuentos, TipoDescuento tipoDescuento) {
+        int descuentoId = descuentos.size() + 1;
+        CondicionesDescuento descuento = new CondicionesDescuento(descuentoId, fchDesde, fchaHasta, diaSemana, porcentaje, tipoTarjeta, tarjetasDescuentos, tipoDescuento);
+
+        descuentos.add(descuento);
+        log.info("Se agrego el descuento Id: " + descuentoId);
+
+        return descuentoId;
     }
 
     public void modificarDescuento() {
@@ -77,8 +138,14 @@ public class DescuentoController {
         return descuentos.stream()
                 .filter(condicionesDescuento ->
                         isDateInRange(condicionesDescuento.getFechaDesde(), condicionesDescuento.getFechaHasta(), venta.getFechaVenta())
-                                && condicionesDescuento.getTarjetasDescuento().contains(venta.getTarjetaDescuento()))
+                                && existTarjetaDescuento(condicionesDescuento.getTarjetasDescuento(), venta.getTarjetaDescuento()))
                 .findAny();
+    }
+
+    private boolean existTarjetaDescuento(List<TarjetaDescuento> tarjetasDescuento, TarjetaDescuento targetTarjetaDescuento) {
+        if (Objects.isNull(tarjetasDescuento) || Objects.isNull(targetTarjetaDescuento)) return false;
+        return tarjetasDescuento.stream()
+                .anyMatch(tarjetaDescuento -> tarjetaDescuento.getTipoTarjeta().equals(targetTarjetaDescuento.getTipoTarjeta()) && tarjetaDescuento.getTarjetaId() == targetTarjetaDescuento.getTarjetaId());
     }
 
     private double getDescuentoDiaDeSemanaAEntrada(Venta venta) {
@@ -103,6 +170,7 @@ public class DescuentoController {
     }
 
     private static boolean isDateInRange(LocalDate startDate, LocalDate endDate, LocalDate targetDate) {
+        if (Objects.isNull(startDate) || Objects.isNull(endDate)) return true;
         return !targetDate.isBefore(startDate) && !targetDate.isAfter(endDate);
     }
 

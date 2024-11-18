@@ -8,5 +8,5 @@ import lombok.Getter;
 public class Combo {
     private int comboId;
     private String descripcion;
-    private Double precio;
+    private double precio;
 }

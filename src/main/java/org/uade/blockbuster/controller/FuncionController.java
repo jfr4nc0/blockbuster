@@ -1,5 +1,6 @@
 package org.uade.blockbuster.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.uade.blockbuster.controller.dto.EntradaDto;
@@ -24,11 +25,10 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class FuncionController {
     private static volatile FuncionController INSTANCE;
     private Collection<Funcion> funciones;
-
-    private static final Logger log = LoggerFactory.getLogger(FuncionController.class);
 
     private FuncionController() {
         this.funciones = new ArrayList<Funcion>();
@@ -73,9 +73,9 @@ public class FuncionController {
     }
 
     public int agregarFuncion(int peliculaId, LocalTime horario, LocalDate fecha, double precioEntrada, int sucursalId, int salaId) throws NotFoundException {
-        Sala sala = new Sala();
-        validarNuevaFuncion(peliculaId, horario, fecha, precioEntrada, sucursalId, salaId, sala);
+        validarNuevaFuncion(peliculaId, horario, fecha, precioEntrada, sucursalId, salaId);
 
+        Sala sala = SucursalController.getInstance().buscarSalaPorSalaId(sucursalId, salaId);
         Pelicula pelicula = PeliculasController.getInstance().buscarPeliculaById(peliculaId);
         Set<Entrada> entradas = crearEntradas(sala.getAsientos(), precioEntrada);
 
@@ -89,7 +89,7 @@ public class FuncionController {
         return funcion.getFuncionId();
     }
 
-    private void validarNuevaFuncion(int peliculaId, LocalTime horario, LocalDate fecha, double precioEntrada, int sucursalId, int salaId, Sala sala) throws NotFoundException {
+    private void validarNuevaFuncion(int peliculaId, LocalTime horario, LocalDate fecha, double precioEntrada, int sucursalId, int salaId) throws NotFoundException {
         if (Objects.isNull(peliculaId)) throw new IllegalArgumentException("El peliculaId no puede ser nulo");
         if (Objects.isNull(horario)) throw new IllegalArgumentException("El horario no puede ser nulo");
         if (Objects.isNull(fecha)) throw new IllegalArgumentException("La fecha no puede ser nulo");
@@ -97,26 +97,28 @@ public class FuncionController {
         if (Objects.isNull(sucursalId)) throw new IllegalArgumentException("El salaId no puede ser nulo");
         if (Objects.isNull(salaId)) throw new IllegalArgumentException("El salaId no puede ser nulo");
 
-        sala = SucursalController.getInstance().buscarSalaPorSalaId(sucursalId, salaId);
-        List<Funcion> funcionesExistentesMismaFecha = buscarFuncionesBySalaId(sala.getSalaId()).stream()
+        Sala sala = SucursalController.getInstance().buscarSalaPorSalaId(sucursalId, salaId);
+        List<Funcion> funcionesExistentesMismaFecha = buscarFuncionesBySalaId(sala.getSucursalId(), sala.getSalaId()).stream()
                 .filter(funcionSub -> funcionSub.getFecha().isEqual(funcionSub.getFecha()))
                 .toList();
 
         Pelicula peliculaPorAgendar = PeliculasController.getInstance().buscarPeliculaById(peliculaId);
 
-        List<LocalTime> horariosFinFuncionAgendadas = funcionesExistentesMismaFecha.stream()
-                .map(funcionSub -> getHorarioFinDeFuncion(funcionSub))
-                .collect(Collectors.toList());
+        if (Objects.nonNull(funcionesExistentesMismaFecha) && !funcionesExistentesMismaFecha.isEmpty()) {
+            List<LocalTime> horariosFinFuncionAgendadas = funcionesExistentesMismaFecha.stream()
+                    .map(funcionSub -> getHorarioFinDeFuncion(funcionSub))
+                    .collect(Collectors.toList());
 
-        LocalTime horarioFinFuncionPorAgendar = horario.plusMinutes(peliculaPorAgendar.getDuracionEnMinutos() + 15);
+            LocalTime horarioFinFuncionPorAgendar = horario.plusMinutes(peliculaPorAgendar.getDuracionEnMinutos() + 15);
 
-        boolean horarioDisponible = horariosFinFuncionAgendadas.stream()
-                .noneMatch(horarioFin ->
-                        horarioFin.isAfter(horario) &&
-                        horarioFin.isBefore(horarioFinFuncionPorAgendar)
-                );
+            boolean horarioDisponible = horariosFinFuncionAgendadas.stream()
+                    .noneMatch(horarioFin ->
+                            horarioFin.isAfter(horario) &&
+                            horarioFin.isBefore(horarioFinFuncionPorAgendar)
+                    );
 
-        if (!horarioDisponible) throw new IllegalArgumentException("El horario no esta disponible");
+            if (!horarioDisponible) throw new IllegalArgumentException("El horario no esta disponible");
+        }
     }
 
     private static LocalTime getHorarioFinDeFuncion(Funcion funcion) {
@@ -202,9 +204,9 @@ public class FuncionController {
                 .orElseThrow(() -> new NotFoundException("No existe una funcion con el id: " + funcionId));
     }
 
-    public List<Funcion> buscarFuncionesBySalaId(int salaId) {
+    public List<Funcion> buscarFuncionesBySalaId(int sucursalId, int salaId) {
         return funciones.stream()
-                .filter(funcion -> funcion.getSalaId() == salaId)
+                .filter(funcion -> funcion.getSucursalId() == sucursalId && funcion.getSalaId() == salaId)
                 .toList();
     }
 
