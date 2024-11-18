@@ -1,7 +1,10 @@
 package org.uade.blockbuster.controller;
 
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.uade.blockbuster.controller.dto.PeliculaDto;
+import org.uade.blockbuster.controller.dto.RecaudacionPorPeliculaDto;
 import org.uade.blockbuster.controller.dto.TarjetaDescuentoDto;
 import org.uade.blockbuster.controller.dto.VentaDto;
 import org.uade.blockbuster.exceptions.NotFoundException;
@@ -13,10 +16,7 @@ import org.uade.blockbuster.model.Venta;
 import org.uade.blockbuster.model.enums.TipoGenero;
 import org.uade.blockbuster.model.enums.TipoTarjeta;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class VentasController {
@@ -157,5 +157,22 @@ public class VentasController {
         return new TarjetaDescuentoDto(
                 tarjetaDescuento.getTarjetaId(),
                 tarjetaDescuento.getTipoTarjeta().toString());
+    }
+
+    @SneakyThrows
+    public List<RecaudacionPorPeliculaDto> getPeliculasConMayorRecaudacion() {
+        return ventas.stream()
+                .map(Venta::getPeliculaId)
+                .distinct()
+                .map(this::getRecaudacionPorPelicula)
+                .sorted(Comparator.comparingDouble(RecaudacionPorPeliculaDto::getRecaudacionTotal).reversed())
+                .toList();
+    }
+
+    private RecaudacionPorPeliculaDto getRecaudacionPorPelicula(int peliculaId) throws NotFoundException {
+        double recaudacionTotal = this.recaudacionPorPelicula(peliculaId);
+        PeliculaDto peliculaDto = PeliculasController.getInstance().buscarPeliculaDtoById(peliculaId);
+
+        return new RecaudacionPorPeliculaDto(peliculaDto, recaudacionTotal);
     }
 }

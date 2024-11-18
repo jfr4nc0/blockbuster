@@ -58,6 +58,13 @@ public class PeliculasController {
                 .toList();
     }
 
+    public List<PeliculaDto> getPeliculasDisponiblesByGenero(String genero) {
+        return peliculas.stream()
+                .filter(pelicula -> pelicula.getGenero().equals(TipoGenero.valueOf(genero)))
+                .map(this::toDto)
+                .toList();
+    }
+
     public int agregarPelicula(PeliculaDto peliculaDto) {
         validarNuevaPelicula(peliculaDto);
 
@@ -96,6 +103,10 @@ public class PeliculasController {
 
     private Optional<Pelicula> buscarPelicula(Predicate<Pelicula> predicate) {
         return peliculas.stream().filter(predicate).findFirst();
+    }
+
+    public PeliculaDto buscarPeliculaDtoById(int peliculaId) throws NotFoundException {
+        return this.toDto(this.buscarPeliculaById(peliculaId));
     }
 
     private PeliculaDto toDto(Pelicula pelicula) {

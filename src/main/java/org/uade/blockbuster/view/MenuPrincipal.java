@@ -3,8 +3,10 @@ package org.uade.blockbuster.view;
 import org.uade.blockbuster.controller.FuncionController;
 import org.uade.blockbuster.controller.PeliculasController;
 import org.uade.blockbuster.controller.SucursalController;
+import org.uade.blockbuster.controller.VentasController;
 import org.uade.blockbuster.controller.dto.FuncionDto;
 import org.uade.blockbuster.controller.dto.PeliculaDto;
+import org.uade.blockbuster.controller.dto.RecaudacionPorPeliculaDto;
 import org.uade.blockbuster.controller.dto.SucursalDto;
 import org.uade.blockbuster.model.Pelicula;
 import org.uade.blockbuster.model.enums.TipoGenero;
@@ -26,10 +28,11 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class MenuPrincipal extends JFrame {
     private JLabel peliculaIdLbl, peliculaNombreLbl, generoPeliculaLbl, duracionPeliculaLbl, directorPeliculaLbl, actoresPeliculaLbl, tipoProyeccionLbl;
-    private JLabel fechaFuncionLbl, horarioFuncionLbl, sucursalIdLbl, salaIdLbl, precioEntradaLbl;
+    private JLabel fechaFuncionLbl, horarioFuncionLbl, sucursalIdLbl, salaIdLbl, precioEntradaLbl, recaudacionPeliculaLbl;
 
     private JTextField peliculaIdTxt, peliculaNombreTxt, generoPeliculaTxt, duracionPeliculaTxt, directorPeliculaTxt, actoresPeliculaTxt, tipoProyeccionTxt;
     private JTextField fechaFuncionTxt, horarioFuncionTxt, sucursalIdTxt, salaIdTxt, precioEntradaTxt;
@@ -70,9 +73,31 @@ public class MenuPrincipal extends JFrame {
     }
 
     private void initializeEmitirReportePeliculasConMayorRecaudacion() {
+        emitirReportePeliculasConMayorRecaudacion.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                displayEmitirReportePeliculasConMayorRecaudacion();
+            }
+        });
+        contentPane.add(emitirReportePeliculasConMayorRecaudacion);
     }
 
     private void initializeConsultarPeliculasPorGeneroComponent() {
+        consultarPeliculas.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                displayConsultarPeliculasPorGenero(null);
+            }
+        });
+        contentPane.add(consultarPeliculas);
+
+        confirmarConsultarPeliculas.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                initializePeliculaLabels();
+                String generoSeleccionado = generosDisponiblesComboBox.getSelectedItem().toString();
+
+                List<PeliculaDto> peliculasDisponiblesPorGenero = PeliculasController.getInstance().getPeliculasDisponiblesByGenero(generoSeleccionado);
+                displayConsultarPeliculasPorGenero(peliculasDisponiblesPorGenero);
+            }
+        });
 
     }
 
@@ -179,10 +204,74 @@ public class MenuPrincipal extends JFrame {
         nuevaFuncionPanel.add(salaIdTxt);
         nuevaFuncionPanel.add(confirmarNuevaFuncion);
 
-        contentPane.add(nuevaFuncionPanel);  // Add this new form panel to contentPane
+        contentPane.add(nuevaFuncionPanel);
 
         contentPane.revalidate();
         contentPane.repaint();
+    }
+
+    private void displayConsultarPeliculasPorGenero(List<PeliculaDto> peliculasPorGenero) {
+        hideAllForms();
+
+        JPanel consultarPeliculasPanel = new JPanel();
+        consultarPeliculasPanel.setLayout(new BoxLayout(consultarPeliculasPanel, BoxLayout.Y_AXIS));
+
+        consultarPeliculasPanel.add(generoPeliculaLbl);
+        consultarPeliculasPanel.add(generosDisponiblesComboBox);
+        consultarPeliculasPanel.add(confirmarConsultarPeliculas);
+
+        if (Objects.nonNull(peliculasPorGenero) && !peliculasPorGenero.isEmpty()){
+            peliculasPorGenero.forEach(peliculaDto -> this.displayPelicula(peliculaDto, consultarPeliculasPanel));
+        }
+
+        contentPane.add(consultarPeliculasPanel);
+
+        contentPane.revalidate();
+        contentPane.repaint();
+    }
+
+    private void displayPelicula(PeliculaDto peliculaDto, JPanel consultarPeliculasPanel) {
+        peliculaNombreLbl.setText("Pelicula: " + peliculaDto.getNombrePelicula());
+        consultarPeliculasPanel.add(peliculaNombreLbl);
+        generoPeliculaLbl.setText("Genero: " + peliculaDto.getGenero());
+        consultarPeliculasPanel.add(generoPeliculaLbl);
+        duracionPeliculaLbl.setText("Duracion en min: " + peliculaDto.getDuracionEnMinutos());
+        consultarPeliculasPanel.add(duracionPeliculaLbl);
+        directorPeliculaLbl.setText("Director: " + peliculaDto.getDirector());
+        consultarPeliculasPanel.add(directorPeliculaLbl);
+        peliculaDto.getActores().forEach(actor -> {
+            actoresPeliculaLbl.setText("Actor/Actriz: " + actor);
+            consultarPeliculasPanel.add(actoresPeliculaLbl);
+        });
+        tipoProyeccionLbl.setText("Tipo Proyeccion: " + peliculaDto.getTipoProyeccion());
+        consultarPeliculasPanel.add(tipoProyeccionLbl);
+    }
+
+    private void displayEmitirReportePeliculasConMayorRecaudacion() {
+        hideAllForms();
+
+        JPanel reporte = new JPanel();
+        reporte.setLayout(new BoxLayout(reporte, BoxLayout.Y_AXIS));
+
+        List<RecaudacionPorPeliculaDto> peliculas = VentasController.getInstance().getPeliculasConMayorRecaudacion();
+        if (Objects.nonNull(peliculas) && !peliculas.isEmpty()){
+            peliculas.forEach(peliculaDto -> this.displayPelicula(peliculaDto, reporte));
+        } else {
+            JOptionPane.showMessageDialog(null, "No se encontraron peliculas");
+        }
+        contentPane.add(reporte);
+
+        contentPane.revalidate();
+        contentPane.repaint();
+    }
+
+    private void displayPelicula(RecaudacionPorPeliculaDto recaudacionPorPeliculaDto, JPanel panel) {
+        peliculaNombreLbl.setText("Pelicula: " + recaudacionPorPeliculaDto.getPeliculaDto().getNombrePelicula());
+        panel.add(peliculaNombreLbl);
+        generoPeliculaLbl.setText("Genero: " + recaudacionPorPeliculaDto.getPeliculaDto().getGenero());
+        panel.add(generoPeliculaLbl);
+        recaudacionPeliculaLbl.setText("Recaudacion Total: " + recaudacionPorPeliculaDto.getRecaudacionTotal());
+        panel.add(recaudacionPeliculaLbl);
     }
 
     private void hideAllForms() {
@@ -191,18 +280,14 @@ public class MenuPrincipal extends JFrame {
         contentPane.add(registrarNuevaPelicula);
         contentPane.add(consultarPeliculas);
         contentPane.add(emitirReportePeliculasConMayorRecaudacion);
+        initializePeliculaLabels();
         contentPane.revalidate();
         contentPane.repaint();
     }
 
     private void initializeComponents() {
         peliculaIdLbl = new JLabel("Pelicula: ");
-        peliculaNombreLbl = new JLabel("Pelicula Nombre: ");
-        generoPeliculaLbl = new JLabel("Genero: ");
-        duracionPeliculaLbl = new JLabel("Duracion: ");
-        directorPeliculaLbl = new JLabel("Director: ");
-        actoresPeliculaLbl = new JLabel("Actores (Delimiter by ';'): ");
-        tipoProyeccionLbl = new JLabel("Tipo de Proyecto: ");
+        initializePeliculaLabels();
         fechaFuncionLbl = new JLabel("Fecha (Format: dd/MM/yyyy): ");
         horarioFuncionLbl = new JLabel("Hora (Format: HH:mm): ");
         sucursalIdLbl = new JLabel("Sucursal: ");
@@ -241,5 +326,14 @@ public class MenuPrincipal extends JFrame {
 
         List<String> tiposProyeccionDisponibles = PeliculasController.getInstance().getTiposProyeccion();
         tiposProyeccionDisponiblesComboBox = new JComboBox<>(tiposProyeccionDisponibles.toArray(new String[0]));
+    }
+
+    private void initializePeliculaLabels() {
+        peliculaNombreLbl = new JLabel("Pelicula Nombre: ");
+        generoPeliculaLbl = new JLabel("Genero: ");
+        duracionPeliculaLbl = new JLabel("Duracion: ");
+        directorPeliculaLbl = new JLabel("Director: ");
+        actoresPeliculaLbl = new JLabel("Actores (Delimiter by ';'): ");
+        tipoProyeccionLbl = new JLabel("Tipo de Proyecto: ");
     }
 }
